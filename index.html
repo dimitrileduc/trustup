@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Architecture TrustUp - Blog Generation</title>
+    <style>
+        body {
+            font-family: monospace;
+            max-width: 1000px;
+            margin: 50px auto;
+            line-height: 1.8;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 20px;
+            border: 1px solid #ddd;
+        }
+        h2 {
+            margin-top: 50px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+        }
+        .highlight {
+            background: #ffeb3b;
+            padding: 2px;
+        }
+        .internal {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .external {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .article-output {
+            background: #fff;
+            padding: 40px;
+            margin: 20px 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .hero-section {
+            background: #fef6e8;
+            padding: 40px;
+            margin: -40px -40px 40px -40px;
+            text-align: center;
+        }
+        .hero-section h1 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        .price-highlight {
+            background: #ffeb3b;
+            padding: 3px 8px;
+            font-weight: bold;
+        }
+        .cta-box {
+            background: white;
+            border: 1px solid #e0e0e0;
+            padding: 30px;
+            text-align: center;
+            margin: 30px 0;
+            border-radius: 8px;
+        }
+        .cta-box h3 {
+            margin: 0 0 20px;
+            font-size: 18px;
+        }
+        .cta-box input {
+            padding: 12px 20px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 200px;
+            margin-right: 10px;
+        }
+        .cta-box button {
+            background: #ffb800;
+            color: black;
+            padding: 12px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .article-output h2 {
+            font-size: 24px;
+            margin: 30px 0 20px;
+            font-weight: 600;
+            border: none;
+        }
+        .meta-info {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Architecture Multi-Agents</h1>
+
+<h2>1. Architecture Générique</h2>
+<pre>
+┌─────────────────┐
+│   Node.js API   │
+└────────┬────────┘
+         │
+┌────────▼────────┐
+│   Trigger.dev   │ ← Orchestration (Cron, Events, Retry)
+└────────┬────────┘
+         │
+┌────────▼────────┐
+│    Mastra.ai    │ ← Multi-agents Framework
+│                 │
+│  ┌───────────┐  │
+│  │   Agent   │  │ ← LLM + Instructions
+│  └─────┬─────┘  │
+│        │        │
+│  ┌─────▼─────┐  │
+│  │   Tools   │  │ ← Functions that agents can call
+│  └─────┬─────┘  │
+│        │        │
+│  ┌─────▼─────┐  │
+│  │   Data    │  │ ← APIs, DBs, Knowledge Base
+│  └───────────┘  │
+└─────────────────┘
+</pre>
+
+<h2>2. Architecture Adaptée TrustUp</h2>
+<pre>
+┌─────────────────┐
+│ Node.js Backend │
+└────────┬────────┘
+         │
+┌────────▼────────┐
+│  Trigger.dev    │ (Cron 6h du matin)
+└────────┬────────┘
+         │
+┌────────▼───────────────────────────────────────────┐
+│                 MASTRA.AI                           │
+│                                                     │
+│  ┌───────────────────────────────────────────┐     │
+│  │         DATA RESEARCH AGENT                │     │
+│  │                                            │     │
+│  │  INTERNAL TOOLS:                           │     │
+│  │  • fetchTrustUpCosts (API TrustUp)        │     │
+│  │  • fetchProjectKnowledge (Knowledge Base) │     │
+│  │                                            │     │
+│  │  EXTERNAL TOOLS:                           │     │
+│  │  • fetchSubsidies (Manual/Scraper)        │     │
+│  │  • fetchRegulations (Manual/Scraper)      │     │
+│  └──────────────┬────────────────────────────┘     │
+│                 │                                   │
+│                 ▼                                   │
+│          {enrichedData}                             │
+│                 │                                   │
+│  ┌──────────────▼────────────────────────────┐     │
+│  │           CONTENT AGENT                   │     │
+│  └──────────────┬────────────────────────────┘     │
+└─────────────────┼───────────────────────────────────┘
+                  │
+         ┌────────▼────────┐
+         │  TrustUp CMS    │
+         └─────────────────┘
+</pre>
+
+<h2>3. Tools Détaillés</h2>
+
+<div class="internal">
+<h3>🟢 INTERNAL TOOLS</h3>
+<pre>
+fetchTrustUpCosts (API TrustUp)
+├── Source: API TrustUp - Base de données projets
+├── Description: Données réelles de 12,000+ projets
+└── Retour: {
+      average: 15000,
+      min: 8000, 
+      max: 25000,
+      dataPoints: 47
+    }
+
+fetchProjectKnowledge (Knowledge Base interne)
+├── Source: Base de connaissances métier TrustUp
+├── Description: Insights standardisés par type de projet
+└── Retour: {
+      duration: "3 semaines",
+      breakdown: {
+        labor: 40,
+        materials: 35,
+        equipment: 20,
+        misc: 5
+      },
+      keyPoints: [
+        "Budget supplémentaire de 10% recommandé",
+        "Vérification état existant crucial",
+        "Coordination entre corps de métier"
+      ],
+      commonIssues: [
+        "Découverte de problèmes cachés",
+        "Délais fournisseurs",
+        "Modifications en cours de chantier"
+      ]
+    }
+</pre>
+</div>
+
+<div class="external">
+<h3>🟠 EXTERNAL TOOLS</h3>
+<pre>
+fetchSubsidies
+├── Option A: Manual API (Dashboard admin)
+├── Option B: Scraper (energie.wallonie.be, etc.)
+└── Retour: Primes disponibles et conditions
+
+fetchRegulations  
+├── Option A: Manual API (Dashboard admin)
+├── Option B: Scraper (sites communaux)
+└── Retour: Permis requis, coûts, délais
+</pre>
+</div>
+
+<h2>4. Flow Réel : "Rénovation Cuisine à Liège"</h2>
+<pre>
+<span class="highlight">INPUT: type = "renovation_cuisine" | ville = "Liège"</span>
+
+┌───────────────────────────────────────────────┐
+│ DATA RESEARCH AGENT                          │
+│                                              │
+│ 1. fetchTrustUpCosts("renovation_cuisine", "Liège")
+│    → {                                       │
+│        average: 15000,                       │
+│        min: 8000,                           │
+│        max: 25000,                          │
+│        dataPoints: 47                       │
+│      }                                       │
+│                                              │
+│ 2. fetchProjectKnowledge("renovation_cuisine")
+│    → {                                       │
+│        duration: "3 semaines",              │
+│        breakdown: {                         │
+│          labor: 40,                        │
+│          materials: 35,                    │
+│          equipment: 20,                    │
+│          misc: 5                           │
+│        },                                    │
+│        keyPoints: [                         │
+│          "Budget supplémentaire 10%",       │
+│          "Vérifier plomberie existante",    │
+│          "Prévoir stockage temporaire"      │
+│        ],                                    │
+│        commonIssues: [                      │
+│          "Murs non droits",                 │
+│          "Plomberie à refaire",            │
+│          "Électricité non conforme"        │
+│        ]                                     │
+│      }                                       │
+│                                              │
+│ 3. fetchSubsidies("Liège")                  │
+│    → {                                       │
+│        primeRenovation: 2000,               │
+│        primeAudit: 150,                     │
+│        conditions: "Revenus < 45000€/an"    │
+│      }                                       │
+│                                              │
+│ 4. fetchRegulations("Liège")                │
+│    → {                                       │
+│        permitRequired: true,                 │
+│        permitCost: 150,                     │
+│        delayWeeks: 2                        │
+│      }                                       │
+│                                              │
+│ Output: enrichedData → CONTENT AGENT         │
+└───────────────────────────────────────────────┘
+</pre>
+
+<h2>5. Article Généré</h2>
+
+<div class="article-output">
+
+<div class="hero-section">
+<h1>Le prix moyen d'une rénovation de cuisine est situé entre <span class="price-highlight">8000 et 25000€</span> par projet</h1>
+
+<div class="cta-box">
+<h3>Comparez 3 devis pour la rénovation de votre cuisine</h3>
+<input type="text" placeholder="Code postal">
+<button>Demandez vos devis</button>
+<p style="margin-top: 15px; color: #666; font-size: 13px;">⭐ Trustpilot <span style="color: #00b67a;">★★★★★</span> Excellent</p>
+</div>
+</div>
+
+<h2>Prix d'une rénovation de cuisine</h2>
+
+<p class="meta-info">Mis à jour le 29 octobre 2024</p>
+
+<p>La rénovation de votre cuisine vous semble difficile ? Vous entendez des bruits anormaux ? La pression diminue soudainement ? Ou votre ancienne cuisine a simplement besoin d'être modernisée ? Il est temps de rénover ! Découvrez dans cet article tout ce qu'il faut savoir sur les prix d'une rénovation de cuisine à Liège et dans votre région.</p>
+
+<h2>Quel est le prix d'une rénovation de cuisine ?</h2>
+
+<p>Le prix d'une rénovation de cuisine varie considérablement en fonction de plusieurs facteurs : la taille de la pièce, la qualité des matériaux choisis, l'ampleur des modifications structurelles et la région où vous habitez.</p>
+
+<p>Sur base de <strong>47 projets récents</strong> réalisés à Liège, voici les fourchettes de prix constatées :</p>
+
+<ul>
+<li><strong>Rénovation basique (rafraîchissement) :</strong> 8 000€ - 12 000€</li>
+<li><strong>Rénovation standard (remplacement complet) :</strong> 12 000€ - 18 000€</li>
+<li><strong>Rénovation haut de gamme :</strong> 18 000€ - 25 000€</li>
+</ul>
+
+<p>Le <strong>prix moyen</strong> d'une rénovation complète de cuisine se situe autour de <strong>15 000€</strong>.</p>
+
+<h2>Détail des coûts par poste</h2>
+
+<p>Pour mieux comprendre où part votre budget, voici la répartition habituelle des coûts pour une rénovation standard :</p>
+
+<table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+<tr style="background: #f5f5f5;">
+<th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Poste de dépense</th>
+<th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Pourcentage</th>
+<th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Montant (base 15 000€)</th>
+</tr>
+<tr>
+<td style="padding: 10px; border: 1px solid #ddd;">Main d'œuvre</td>
+<td style="padding: 10px; border: 1px solid #ddd;">40%</td>
+<td style="padding: 10px; border: 1px solid #ddd;">6 000€</td>
+</tr>
+<tr>
+<td style="padding: 10px; border: 1px solid #ddd;">Matériaux (meubles, plan de travail)</td>
+<td style="padding: 10px; border: 1px solid #ddd;">35%</td>
+<td style="padding: 10px; border: 1px solid #ddd;">5 250€</td>
+</tr>
+<tr>
+<td style="padding: 10px; border: 1px solid #ddd;">Équipements électroménagers</td>
+<td style="padding: 10px; border: 1px solid #ddd;">20%</td>
+<td style="padding: 10px; border: 1px solid #ddd;">3 000€</td>
+</tr>
+<tr>
+<td style="padding: 10px; border: 1px solid #ddd;">Divers et imprévus</td>
+<td style="padding: 10px; border: 1px solid #ddd;">5%</td>
+<td style="padding: 10px; border: 1px solid #ddd;">750€</td>
+</tr>
+</table>
+
+<h2>Durée des travaux</h2>
+
+<p>Une rénovation complète de cuisine prend généralement <strong>3 semaines</strong>, réparties comme suit :</p>
+<ul>
+<li>Démolition et évacuation : 2-3 jours</li>
+<li>Travaux techniques (plomberie, électricité) : 3-4 jours</li>
+<li>Installation des nouveaux éléments : 5-7 jours</li>
+<li>Finitions et nettoyage : 2-3 jours</li>
+</ul>
+
+<h2>Les primes disponibles</h2>
+
+<p>En Région Wallonne, vous pouvez bénéficier de plusieurs aides :</p>
+
+<ul>
+<li><strong>Prime à la rénovation :</strong> jusqu'à 2 000€ pour les ménages aux revenus modestes (< 45 000€/an)</li>
+<li><strong>Prime audit logement :</strong> 150€ pour évaluer les améliorations possibles</li>
+<li><strong>TVA réduite à 6% :</strong> pour les logements de plus de 10 ans</li>
+</ul>
+
+<h2>Points d'attention importants</h2>
+
+<p>Lors de la rénovation d'une cuisine, particulièrement dans les habitations anciennes de Liège, soyez vigilant sur :</p>
+
+<ul>
+<li>L'état de la plomberie existante (souvent à refaire dans l'ancien)</li>
+<li>La conformité électrique (mise aux normes souvent nécessaire)</li>
+<li>Les murs non droits qui compliquent l'installation</li>
+<li>La nécessité d'un permis d'urbanisme pour les modifications structurelles</li>
+</ul>
+
+<p style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0;">
+<strong>💡 Notre conseil :</strong> Prévoyez toujours un budget supplémentaire de 10% pour faire face aux imprévus. Dans les rénovations de cuisine, des problèmes cachés apparaissent fréquemment une fois les anciens éléments démontés.
+</p>
+
+<div class="cta-box">
+<h3>Trouvez le meilleur prix pour votre rénovation de cuisine</h3>
+<input type="text" placeholder="Code postal">
+<button>Comparez les devis</button>
+</div>
+
+<p style="color: #666; font-size: 14px; margin-top: 30px;">
+<em>Les prix mentionnés sont basés sur une analyse de projets réels réalisés en 2024. Les tarifs peuvent varier selon votre localisation et les spécificités de votre projet.</em>
+</p>
+
+</div>
+
+</body>
+</html>
